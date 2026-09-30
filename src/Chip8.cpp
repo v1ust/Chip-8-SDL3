@@ -31,7 +31,6 @@ int Chip8::loadFromFile(string path)
 }
 
 void Chip8::step() {
-    cout<<"Chip8::step"<<endl;
     uint16_t sk;
     uint16_t type,X,Y,N = 0;
     uint16_t NNN,NN = 0;
@@ -45,9 +44,11 @@ void Chip8::step() {
     pc += 2;
     switch (type) {
         case 0x0: {
-            for (int i = 0; i < 64; i++) {
-                for (int j = 0; j < 32; j++) {
-                    screen[i][j] = 0;
+            if (sk == 0x00E0) {
+                for (int i = 0; i < 64; i++) {
+                    for (int j = 0; j < 32; j++) {
+                        screen[i][j] = 0;
+                    }
                 }
             }
         }
@@ -80,7 +81,6 @@ void Chip8::step() {
             sy = V[Y] % 32;
             for (int i = 0; i < N; i++) {
                 tmp = memory[I + i];
-                std::cout << "row " << i << ": " << std::bitset<8>(tmp) << '\n';
                 for (int j = 0; j < 8; j++) {
                     if (tmp & (0x80 >> j)) {
                         px = sx + j;
@@ -99,15 +99,14 @@ void Chip8::step() {
         default: cout << "Неизвестный опкод: " << hex << sk << endl;
             break;
     }
-    cout << "opcode = " << hex << sk << endl;
 }
 
-void Chip8::printScreen() {
-    int i = 0;
-    for (int y = 0; y < 32; y++) {
-        for (int x = 0; x < 64; x++) {
-            std::cout << (screen[x][y] ? '#' : '.');
-        }
-        std::cout << '\n';
-    }
-}
+// void Chip8::printScreen() {
+//     int i = 0;
+//     for (int y = 0; y < 32; y++) {
+//         for (int x = 0; x < 64; x++) {
+//             std::cout << (screen[x][y] ? '#' : '.');
+//         }
+//         std::cout << '\n';
+//     }
+// }

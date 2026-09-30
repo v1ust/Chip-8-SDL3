@@ -13,12 +13,8 @@ int main(int argc, char* argv[]) {
     int result = chip8.loadFromFile(argv[1]);
     if (result != 0) {
         cerr<<"Ошибка чтения rom"<<strerror(errno)<<endl;
-        return -1;
+        return 1;
     }
-    // for (int i = 0; i < 100; i++) {
-    //     chip8.step();
-    // }
-    chip8.printScreen();
     if (!SDL_Init(SDL_INIT_VIDEO)) {
         SDL_Log("Не удалось инициализировать SDL: %s", SDL_GetError());
         return 1;
