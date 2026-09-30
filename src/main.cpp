@@ -1,9 +1,25 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
+#include "Chip8.h"
 
-// Тестовая программа: проверяем, что SDL3 подключён и окно открывается.
-// Закрыть: крестик окна или Escape.
-int main(int, char*[]) {
+using namespace std;
+
+int main(int argc, char* argv[]) {
+    if (argc < 2) {
+        cerr<<"Не все аргументы были получены"<<endl;
+        return -1;
+
+    }
+    Chip8 chip8;
+    int result = chip8.loadFromFile(argv[1]);
+    if (result != 0) {
+        cerr<<"Ошибка чтения rom"<<strerror(errno)<<endl;
+        return -1;
+    }
+    for (int i = 0; i < 100; i++) {
+        chip8.step();
+    }
+    chip8.printScreen();
     if (!SDL_Init(SDL_INIT_VIDEO)) {
         SDL_Log("Не удалось инициализировать SDL: %s", SDL_GetError());
         return 1;
@@ -16,7 +32,8 @@ int main(int, char*[]) {
         SDL_Quit();
         return 1;
     }
-    SDL_SetRenderVSync(renderer, 1);  // не грузить процессор на 100%
+
+    SDL_SetRenderVSync(renderer, 1);
 
     bool running = true;
     while (running) {
@@ -36,6 +53,7 @@ int main(int, char*[]) {
         SDL_SetRenderDrawColor(renderer, 50, 220, 120, 255);
         SDL_FRect square{270.0f, 110.0f, 100.0f, 100.0f};
         SDL_RenderFillRect(renderer, &square);
+
 
         SDL_RenderPresent(renderer);
     }

@@ -7,8 +7,11 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)  # нужен редактору для п
 
 find_package(SDL3 REQUIRED CONFIG)
 
-add_executable(chip8 src/main.cpp)
+add_executable(chip8 src/main.cpp
+        src/Chip8.cpp
+        inc/Chip8.h)
 target_link_libraries(chip8 PRIVATE SDL3::SDL3)
+target_include_directories(chip8 PRIVATE inc)
 
 # Строгие предупреждения всегда, а в Debug ещё и санитайзеры:
 # они ловят выход за границы массива и неопределённое поведение прямо во время работы
