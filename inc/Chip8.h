@@ -4,6 +4,9 @@
 #include <vector>
 #include <iostream>
 #include <string.h>
+#include <string>
+#include <cstdint>
+#include <stack>
 // 00E0	Очистить экран
 // 1NNN	Перейти по адресу NNN (записать NNN в PC)
 // 6XNN	Записать NN в регистр VX
@@ -18,6 +21,7 @@ private:
     uint16_t pc = 0x200;
     uint8_t V[16] = {};  // регистры V0–VF
     uint16_t I = 0;      // адресный регистр
+    std::stack <uint16_t> stack = {};  // адреса возврата
 
 public:
     uint8_t screen[64][32] = {};

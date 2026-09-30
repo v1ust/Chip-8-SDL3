@@ -51,10 +51,47 @@ void Chip8::step() {
                     }
                 }
             }
+            if (sk == 0x00EE) {
+                if (!stack.empty()) {
+                    pc = stack.top();
+                    stack.pop();
+                }
+            }
+            else {
+                cerr<<"stack empty"<<endl;
+            }
         }
         break;
         case 0x1: {
             pc = NNN;
+        }
+        break;
+        case 0x2: {
+            if (stack.size() <16) {
+                stack.push(pc);
+                pc = NNN;
+            }
+            else {
+                cerr<<"stack overflow"<<endl;
+            }
+        }
+        break;
+        case 0x3: {
+            if (V[X] == NN) {
+                pc += 2;
+            }
+        }
+        break;
+        case 0x4: {
+            if (V[X]!= NN) {
+                pc += 2;
+            }
+        }
+        break;
+        case 0x5: {
+            if (V[X] == V[Y]) {
+                pc += 2;
+            }
         }
         break;
         case 0x6: {
@@ -65,10 +102,28 @@ void Chip8::step() {
             V[X] += NN;
         }
         break;
+        // case 0x8: {
+        //
+        // }
+        // break;
+        case 0x9: {
+            if (V[X] != V[Y]) {
+                pc += 2;
+            }
+        }
+        break;
         case 0xA: {
             I = NNN;
         }
         break;
+        // case 0xB: {
+        //
+        // }
+        // break;
+        // case 0xC: {
+        //
+        // }
+        // break;
         case 0xD: {
             // DXYN	Нарисовать спрайт высотой N строк из памяти по адресу I в точке (V[X], V[Y])
             uint16_t sx = 0, sy = 0;
