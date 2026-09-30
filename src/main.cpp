@@ -8,7 +8,6 @@ int main(int argc, char* argv[]) {
     if (argc < 2) {
         cerr<<"Не все аргументы были получены"<<endl;
         return -1;
-
     }
     Chip8 chip8;
     int result = chip8.loadFromFile(argv[1]);
@@ -16,9 +15,9 @@ int main(int argc, char* argv[]) {
         cerr<<"Ошибка чтения rom"<<strerror(errno)<<endl;
         return -1;
     }
-    for (int i = 0; i < 100; i++) {
-        chip8.step();
-    }
+    // for (int i = 0; i < 100; i++) {
+    //     chip8.step();
+    // }
     chip8.printScreen();
     if (!SDL_Init(SDL_INIT_VIDEO)) {
         SDL_Log("Не удалось инициализировать SDL: %s", SDL_GetError());
@@ -34,9 +33,13 @@ int main(int argc, char* argv[]) {
     }
 
     SDL_SetRenderVSync(renderer, 1);
+    SDL_SetRenderScale(renderer, 10.0f, 10.0f);
 
     bool running = true;
     while (running) {
+        for (int i = 0; i < 10; i++) {
+            chip8.step();
+        }
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_EVENT_QUIT) {
@@ -47,13 +50,20 @@ int main(int argc, char* argv[]) {
             }
         }
 
+
+
         SDL_SetRenderDrawColor(renderer, 20, 20, 20, 255);
         SDL_RenderClear(renderer);
 
         SDL_SetRenderDrawColor(renderer, 50, 220, 120, 255);
-        SDL_FRect square{270.0f, 110.0f, 100.0f, 100.0f};
-        SDL_RenderFillRect(renderer, &square);
-
+        for (int x = 0; x < 64; x++) {
+            for (int y = 0; y < 32; y++) {
+                if (chip8.screen[x][y] == 1) {
+                    SDL_FRect pix {static_cast<float>(x), static_cast<float>(y), 1, 1};
+                    SDL_RenderFillRect(renderer, &pix);
+                }
+            }
+        }
 
         SDL_RenderPresent(renderer);
     }

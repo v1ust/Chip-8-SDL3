@@ -1,7 +1,6 @@
 #include "Chip8.h"
 #include <string.h>
 #include <errno.h>
-#include <SDL3/SDL_render.h>
 using namespace std;
 
 int Chip8::loadFromFile(string path)
@@ -81,6 +80,7 @@ void Chip8::step() {
             sy = V[Y] % 32;
             for (int i = 0; i < N; i++) {
                 tmp = memory[I + i];
+                std::cout << "row " << i << ": " << std::bitset<8>(tmp) << '\n';
                 for (int j = 0; j < 8; j++) {
                     if (tmp & (0x80 >> j)) {
                         px = sx + j;
@@ -94,7 +94,6 @@ void Chip8::step() {
                     }
                 }
             }
-
         }
         break;
         default: cout << "Неизвестный опкод: " << hex << sk << endl;
@@ -104,6 +103,7 @@ void Chip8::step() {
 }
 
 void Chip8::printScreen() {
+    int i = 0;
     for (int y = 0; y < 32; y++) {
         for (int x = 0; x < 64; x++) {
             std::cout << (screen[x][y] ? '#' : '.');
