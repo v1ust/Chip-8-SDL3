@@ -1,6 +1,7 @@
 #include "Chip8.h"
 #include <string.h>
 #include <errno.h>
+#include <random>
 using namespace std;
 
 int Chip8::loadFromFile(string path)
@@ -31,6 +32,10 @@ int Chip8::loadFromFile(string path)
 }
 
 void Chip8::step() {
+    random_device rd;
+    mt19937 gen(rd());
+    uniform_int_distribution<int> dis(0, 255);
+    int rnd = dis(gen);
     uint16_t sk;
     uint16_t type,X,Y,N = 0;
     uint16_t NNN,NN = 0;
@@ -56,9 +61,9 @@ void Chip8::step() {
                     pc = stack.top();
                     stack.pop();
                 }
-            }
-            else {
-                cerr<<"stack empty"<<endl;
+                else {
+                    cerr<<"stack empty"<<endl;
+                }
             }
         }
         break;
@@ -102,10 +107,49 @@ void Chip8::step() {
             V[X] += NN;
         }
         break;
-        // case 0x8: {
-        //
-        // }
-        // break;
+        case 0x8: {
+            if (N == 0) {
+                V[X] = V[Y];
+            }
+            else if (N == 1) {
+                V[X] = V[X] | V[Y];
+            }
+            else if (N == 2) {
+                V[X] = V[X] & V[Y];
+            }
+            else if (N == 3) {
+                V[X] = V[X] ^ V[Y];
+            }
+            else if (N == 4) {
+                int tmpres = V[X] + V[Y];
+                uint8_t tmpflag = (tmpres > 255);
+                V[X] = tmpres;
+                V[0xF] = tmpflag;
+            }
+            else if (N == 5) {
+                int tmpres = V[X] - V[Y];
+                uint8_t tmpflag = (V[X] >= V[Y]);
+                V[X] = tmpres;
+                V[0xF] = tmpflag;
+            }
+            else if (N == 6) {
+                uint8_t tmp = (V[X] & 0x01);
+                V[X] = V[X] >> 1;
+                V[15] = tmp;
+            }
+            else if (N == 7) {
+                int tmpres = V[Y] - V[X];
+                uint8_t tmpflag = (V[Y] >= V[X]);
+                V[X] = tmpres;
+                V[0xF] = tmpflag;
+            }
+            else if (N == 0xE) {
+                uint8_t tmp = (V[X] & 0x80) >> 7;
+                V[X] = V[X] << 1;
+                V[15] = tmp;
+            }
+        }
+        break;
         case 0x9: {
             if (V[X] != V[Y]) {
                 pc += 2;
@@ -116,14 +160,14 @@ void Chip8::step() {
             I = NNN;
         }
         break;
-        // case 0xB: {
-        //
-        // }
-        // break;
-        // case 0xC: {
-        //
-        // }
-        // break;
+        case 0xB: {
+                pc = NNN + V[0];
+        }
+        break;
+        case 0xC: {
+            V[X] = rnd & NN;
+        }
+        break;
         case 0xD: {
             // DXYN	Нарисовать спрайт высотой N строк из памяти по адресу I в точке (V[X], V[Y])
             uint16_t sx = 0, sy = 0;
@@ -147,6 +191,31 @@ void Chip8::step() {
                             screen[px][py] ^= 1;
                         }
                     }
+                }
+            }
+        }
+        break;
+        // case 0xE: {
+        //
+        // }
+        break;
+        case 0xF: {
+            if (NN == 0x001e) {
+                I = I + V[X];
+            }
+            else if (NN == 0x0033) {
+                memory[I + 0] = V[X] / 100;
+                memory[I + 1] = (V[X] / 10)%10;
+                memory[I + 2] = V[X] % 10;
+            }
+            else if (NN == 0x0055) {
+                for (int i = 0; i <= X; i++) {
+                    memory[I + i] = V[i];
+                }
+            }
+            else if (NN == 0x0065) {
+                for (int i = 0; i <= X; i++) {
+                    V[i] = memory[I+i];
                 }
             }
         }
