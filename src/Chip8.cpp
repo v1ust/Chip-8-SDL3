@@ -169,10 +169,8 @@ void Chip8::step() {
         }
         break;
         case 0xD: {
-            // DXYN	Нарисовать спрайт высотой N строк из памяти по адресу I в точке (V[X], V[Y])
             uint16_t sx = 0, sy = 0;
             uint8_t tmp = 0;
-            uint8_t tmp2 = 0;
             int px = 0;
             int py = 0;
             V[0xF] = 0;
@@ -195,9 +193,25 @@ void Chip8::step() {
             }
         }
         break;
-        // case 0xE: {
-        //
-        // }
+            // Опкод	Что делает
+            // EX9E	Пропустить следующую инструкцию, если клавиша с номером V[X] нажата
+            // EXA1	Пропустить следующую инструкцию, если клавиша с номером V[X] не нажата
+            // FX0A	Ждать нажатия любой клавиши, номер записать в V[X]
+            // FX07	V[X] = значение таймера задержки
+            // FX15	таймер задержки = V[X]
+            // FX18	таймер звука = V[X]
+        case 0xE: {
+            if (NN == 0x009E) {
+                if (keys[V[X]] == true) {
+                    pc += 2;
+                }
+            }
+            else if (NN == 0x00A1) {
+                if (keys[V[X]] == false) {
+                    pc += 2;
+                }
+            }
+        }
         break;
         case 0xF: {
             if (NN == 0x001e) {
@@ -218,6 +232,27 @@ void Chip8::step() {
                     V[i] = memory[I+i];
                 }
             }
+            else if (NN == 0x000A) {
+                bool flag = false;
+                for (int i = 0; i < 16; i++) {
+                    if (keys[i] == true) {
+                        flag = true;
+                        V[X] = i;
+                    }
+                }
+                if (flag == false) {
+                    pc -= 2;
+                }
+            }
+            else if (NN == 0x0007) {
+                V[X] = delayTimer;
+            }
+            else if (NN == 0x0015) {
+                delayTimer = V[X];
+            }
+            else if (NN == 0x0018) {
+                soundTimer = V[X];
+            }
         }
         break;
         default: cout << "Неизвестный опкод: " << hex << sk << endl;
@@ -225,12 +260,13 @@ void Chip8::step() {
     }
 }
 
-// void Chip8::printScreen() {
-//     int i = 0;
-//     for (int y = 0; y < 32; y++) {
-//         for (int x = 0; x < 64; x++) {
-//             std::cout << (screen[x][y] ? '#' : '.');
-//         }
-//         std::cout << '\n';
-//     }
-// }
+void Chip8::tickTimers() {
+    if (delayTimer>0) delayTimer--;
+    if (soundTimer> 0) soundTimer--;
+}
+
+void Chip8::setKey(uint8_t key, bool pressed) {
+    if (key <16) {
+        keys[key] = pressed;
+    }
+}

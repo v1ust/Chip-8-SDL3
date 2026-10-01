@@ -4,6 +4,79 @@
 
 using namespace std;
 
+int getKeyCode(SDL_Keycode key) {
+    switch (key) {
+        case SDLK_1: {
+            return 1;
+        }
+        break;
+        case SDLK_2: {
+            return 2;
+        }
+        break;
+        case SDLK_3: {
+            return 3;
+        }
+        break;
+        case SDLK_4: {
+            return 12;
+        }
+        break;
+        case SDLK_Q: {
+            return 4;
+        }
+        break;
+        case SDLK_W: {
+            return 5;
+        }
+        break;
+        case SDLK_R: {
+            return 13;
+        }
+        break;
+        case SDLK_A: {
+            return 7;
+        }
+        break;
+        case SDLK_S: {
+            return 8;
+        }
+        break;
+        case SDLK_D: {
+            return 9;
+        }
+        break;
+        case SDLK_F: {
+            return 14;
+        }
+        break;
+        case SDLK_Z: {
+            return 10;
+        }
+        break;
+        case SDLK_X: {
+            return 0;
+        }
+        break;
+        case SDLK_C: {
+            return 11;
+        }
+        break;
+        case SDLK_V: {
+            return 15;
+        }
+        break;
+        case SDLK_E: {
+            return 6;
+        }
+        break;
+        default: {
+            return -1;
+        }
+        break;
+    }
+}
+
 int main(int argc, char* argv[]) {
     if (argc < 2) {
         cerr<<"Не все аргументы были получены"<<endl;
@@ -32,9 +105,16 @@ int main(int argc, char* argv[]) {
     SDL_SetRenderScale(renderer, 10.0f, 10.0f);
 
     bool running = true;
+    uint64_t last = SDL_GetTicks();
+    double acc = 0.0;
+    const double tickMs = 1000.0 / 60.0;
     while (running) {
-        for (int i = 0; i < 10; i++) {
-            chip8.step();
+        uint64_t now = SDL_GetTicks();
+        acc += now - last;
+        last = now;
+        while (acc >= tickMs) {
+            chip8.tickTimers();
+            acc -= tickMs;
         }
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
@@ -44,9 +124,16 @@ int main(int argc, char* argv[]) {
             if (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_ESCAPE) {
                 running = false;
             }
+            if (event.type == SDL_EVENT_KEY_DOWN || event.type == SDL_EVENT_KEY_UP) {
+                int k = getKeyCode(event.key.key);
+                if (k != -1) {
+                    chip8.setKey(k, event.type == SDL_EVENT_KEY_DOWN);
+                }
+            }
         }
-
-
+        for (int i = 0; i < 10; i++) {
+            chip8.step();
+        }
 
         SDL_SetRenderDrawColor(renderer, 20, 20, 20, 255);
         SDL_RenderClear(renderer);
